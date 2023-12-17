@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -20,16 +21,12 @@ public class JwtService {
 
     private String secretKey;
 
-    public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+    public String generateToken(UserDetails userDetails) {
+        return buildToken(userDetails, new HashMap<>());
+    }
 
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
+    public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+        return buildToken(userDetails, extraClaims);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -42,6 +39,17 @@ public class JwtService {
         boolean isTokenExpired = isTokenExpired(token);
 
         return isUserValid && !isTokenExpired;
+    }
+
+    private String buildToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     private Key getSignInKey() {
