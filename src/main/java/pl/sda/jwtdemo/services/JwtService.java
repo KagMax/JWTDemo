@@ -60,7 +60,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(bytes);
     }
 
-    private String extractUsername(String token) {
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
